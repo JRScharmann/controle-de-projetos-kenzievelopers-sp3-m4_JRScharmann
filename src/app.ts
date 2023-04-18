@@ -7,7 +7,7 @@ import { createProject, deleteProject, updateProject } from "./projectsLogics";
 const app: Application = express();
 app.use(express.json())
 
-app.post("/developers", ensureEmailDontExist,createDeveloper)
+app.post("/developers", createDeveloper)
 app.get("/developers/:id",ensureDeveloperExistsMiddleware,retrieveDeveloper)
 app.patch("/developers/:id", ensureDeveloperExistsMiddleware, updateDeveloper)
 app.delete("/developers/:id", ensureDeveloperExistsMiddleware, deleteDeveloper)

@@ -49,7 +49,7 @@ const ensureEmailDontExist = async (req: Request,
         const email: any = req.body.email
 
         console.log(email)
-    
+
         const queryString: string = `
             SELECT 
                 *
@@ -66,9 +66,12 @@ const ensureEmailDontExist = async (req: Request,
 
         const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
 
+        console.log(queryConfig)
+        console.log(queryResult)
+
         if(queryResult.rowCount !== 0){
             return res.status(409).json({
-                error: "Email already exists!"
+                message: "Email already exists!"
             })
         }
 

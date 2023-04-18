@@ -25,11 +25,17 @@ const createDeveloper = async (
        text: queryString ,
        values: Object.values(developerData),
    }
-
-   const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
-
-
-   return res.status(201).json(queryResult.rows[0])
+    try{
+        const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
+        return res.status(201).json(queryResult.rows[0])
+    }catch(error: any){
+        if(error.message === 'duplicate key value violates unique constraint "developers_email_key"'){
+            return res.status(409).json({
+                message: "Email already exists!"
+            })
+        }
+        return res.status(500)
+    }
 }
 
 const retrieveDeveloper = async (req: Request,

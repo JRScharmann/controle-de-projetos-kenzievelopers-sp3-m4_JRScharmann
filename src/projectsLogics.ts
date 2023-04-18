@@ -55,8 +55,6 @@ const updateProject = async (req: Request,
         }
 
         const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
-
-        console.log(updateData)
     
         return res.json(updateData)
     }
