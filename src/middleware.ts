@@ -35,8 +35,6 @@ const ensureDeveloperExistsMiddleware = async (req: Request,
             })
         }
 
-    res.locals.developer = queryResult.rows[0]
-
     return next()
 
 }

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, request } from "express";
 import { QueryConfig, QueryResult } from "pg";
 import { client } from "./database";
 import { TCreateDeveloperInfo, TDeveloper, TDeveloperInfoRequest, TDeveloperRequest } from "./interfaces";
@@ -42,9 +42,36 @@ const retrieveDeveloper = async (req: Request,
     res: Response
     ): Promise<Response> =>{
 
-        const developer: TDeveloper = res.locals.developer
+        const id: number = parseInt(req.params.id)
+
+        const queryString: string = `
+        SELECT *
+        FROM developers AS d 
+        LEFT JOIN developer_infos AS di ON "developerId" = d.id
+        WHERE d.id = $1;
+        `
+        const queryConfig: QueryConfig = {
+            text: queryString,
+            values: [id]
+        }
+
+        const queryResult: QueryResult = await client.query(queryConfig)
     
-        return res.json(developer)
+        if(queryResult.rowCount === 0){
+            return res.status(404).json({
+                message: "Developer not found."
+            })
+        }
+
+        const dev = queryResult.rows[0]
+
+        return res.status(200).json({
+            developerId: id,
+            developerName: dev.name,
+            developerEmail: dev.email,
+            developerInfoDeveloperSince: dev.developerSince,
+            developerInfoPreferredOS: dev.preferredOS
+          })
     }
 
 const updateDeveloper = async (req: Request,
@@ -52,7 +79,6 @@ const updateDeveloper = async (req: Request,
     ): Promise<Response> =>{
         const id: number = parseInt(req.params.id)
         const updateData: Partial<TDeveloperRequest> = req.body 
-
 
         const queryString: string = format(`
         UPDATE
@@ -69,11 +95,23 @@ const updateDeveloper = async (req: Request,
             values: [id]
         }
 
-        const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
-
-        console.log(updateData)
+        try{
+            const queryResult: QueryResult = await client.query(queryConfig)
+            if(queryResult.rowCount === 0){
+                return res.status(404).json({
+                    message: "Developer not found."
+                })
+            }
+            return res.json(updateData)
+        }catch(error: any){
+            if(error.message === 'duplicate key value violates unique constraint "developers_email_key"'){
+                return res.status(409).json({
+                    message: "Email already exists!"
+                })
+            }
+            return res.status(500)
+        }
     
-        return res.json(updateData)
     }
 
     const deleteDeveloper = async (req: Request,
@@ -113,18 +151,31 @@ const updateDeveloper = async (req: Request,
         }
 
        const queryString:string = format(`
-       INSERT INTO
-       developer_infos
-           (%I)
-       VALUES(%L)
-           RETURNING *;`,
-           Object.keys(data),
-           Object.values(data))
+        INSERT INTO
+        developer_infos(%I)
+        VALUES(%L)
+        RETURNING *;`,
+        Object.keys(data),
+        Object.values(data))
 
-   const queryResult: QueryResult<TDeveloper> = await client.query(queryString)
+    try{
+        const queryResult: QueryResult = await client.query(queryString)
+        return res.status(201).json(queryResult.rows[0])
+    }catch(error: any){
+        if(error.message === 'duplicate key value violates unique constraint "developer_infos_developerId_key"'){
+            return res.status(409).json({
+            message: "Developer infos already exists."
+            })
+        }
+        if(error.message.startsWith('invalid input value for enum "OS":')){
+            return res.status(400).json({
+            message: "Invalid OS option.",
+            options: ["Windows", "Linux", "MacOS"]
+            })
+        }
+    return res.status(500)
+    }
 
-
-   return res.status(201).json(queryResult.rows[0])
 }
 
 export {
