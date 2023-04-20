@@ -34,7 +34,7 @@ const createDeveloper = async (
                 message: "Email already exists!"
             })
         }
-        return res.status(500)
+        return res.status(500).send()
     }
 }
 
@@ -109,7 +109,7 @@ const updateDeveloper = async (req: Request,
                     message: "Email already exists!"
                 })
             }
-            return res.status(500)
+            return res.status(500).send()
         }
     
     }
@@ -173,7 +173,7 @@ const updateDeveloper = async (req: Request,
             options: ["Windows", "Linux", "MacOS"]
             })
         }
-    return res.status(500)
+    return res.status(500).send()
     }
 
 }

@@ -6,14 +6,14 @@ import { TDeveloper } from "./interfaces";
 const ensureDeveloperExistsMiddleware = async (req: Request,
     res: Response,
     next: NextFunction
-    ): Promise<Response | void> =>{   
-        let id: number = parseInt(req.params.id)
+): Promise<Response | void> => {
+    let id: number = parseInt(req.params.id)
 
-        if(req.route.path === '/projects'){
-            id = req.body.developerId
-        }
-    
-        const queryString: string = `
+    if (req.route.path === '/projects') {
+        id = req.body.developerId
+    }
+
+    const queryString: string = `
             SELECT 
                 *
             FROM
@@ -21,19 +21,19 @@ const ensureDeveloperExistsMiddleware = async (req: Request,
             WHERE
                 id = $1;
         `
-    
-        const queryConfig: QueryConfig = {
-            text: queryString,
-            values: [id]
-        }
 
-        const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
+    const queryConfig: QueryConfig = {
+        text: queryString,
+        values: [id]
+    }
 
-        if(queryResult.rowCount === 0){
-            return res.status(404).json({
-                message: "Developer not found!"
-            })
-        }
+    const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
+
+    if (queryResult.rowCount === 0) {
+        return res.status(404).json({
+            message: "Developer not found!"
+        })
+    }
 
     return next()
 
@@ -42,13 +42,11 @@ const ensureDeveloperExistsMiddleware = async (req: Request,
 const ensureEmailDontExist = async (req: Request,
     res: Response,
     next: NextFunction
-    ): Promise<Response | void> =>{
-    
-        const email: any = req.body.email
+): Promise<Response | void> => {
 
-        console.log(email)
+    const email: any = req.body.email
 
-        const queryString: string = `
+    const queryString: string = `
             SELECT 
                 *
             FROM
@@ -56,22 +54,19 @@ const ensureEmailDontExist = async (req: Request,
             WHERE
                 email = $1;
         `
-    
-        const queryConfig: QueryConfig = {
-            text: queryString,
-            values: [email]
-        }
 
-        const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
+    const queryConfig: QueryConfig = {
+        text: queryString,
+        values: [email]
+    }
 
-        console.log(queryConfig)
-        console.log(queryResult)
+    const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
 
-        if(queryResult.rowCount !== 0){
-            return res.status(409).json({
-                message: "Email already exists!"
-            })
-        }
+    if (queryResult.rowCount !== 0) {
+        return res.status(409).json({
+            message: "Email already exists!"
+        })
+    }
 
     return next()
 }
@@ -79,14 +74,14 @@ const ensureEmailDontExist = async (req: Request,
 const ensureProjectExistsMiddleware = async (req: Request,
     res: Response,
     next: NextFunction
-    ): Promise<Response | void> =>{   
-        let id: number = parseInt(req.params.id)
+): Promise<Response | void> => {
+    let id: number = parseInt(req.params.id)
 
-        if(req.route.path === '/projects' && req.method === 'POST'){
-            id = req.body.developerId
-        }
-    
-        const queryString: string = `
+    if (req.route.path === '/projects' && req.method === 'POST') {
+        id = req.body.developerId
+    }
+
+    const queryString: string = `
             SELECT 
                 *
             FROM
@@ -94,19 +89,19 @@ const ensureProjectExistsMiddleware = async (req: Request,
             WHERE
                 id = $1;
         `
-    
-        const queryConfig: QueryConfig = {
-            text: queryString,
-            values: [id]
-        }
 
-        const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
+    const queryConfig: QueryConfig = {
+        text: queryString,
+        values: [id]
+    }
 
-        if(queryResult.rowCount === 0){
-            return res.status(404).json({
-                message: "Project not found!"
-            })
-        }
+    const queryResult: QueryResult<TDeveloper> = await client.query(queryConfig)
+
+    if (queryResult.rowCount === 0) {
+        return res.status(404).json({
+            message: "Project not found!"
+        })
+    }
 
     res.locals.project = queryResult.rows[0]
 
